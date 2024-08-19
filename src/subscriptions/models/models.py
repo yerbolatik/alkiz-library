@@ -8,12 +8,47 @@ from subscriptions.models.choices import SUBSCRIPTION_CHOICES
 from users.mixins import TimestampMixin
 
 
+class SubscriptionManager(models.Manager):
+    """
+    Менеджер для управления подписками.
+
+    Методы:
+    - create: Создает подписку, проверяя наличие активной подписки у пользователя.
+    """
+
+    def create(self, **kwargs):
+        user = kwargs.get('user')
+        if self.filter(user=user, active=True).exists():
+            raise ValueError("User already has an active subscription.")
+        return super().create(**kwargs)
+
+
 class Subscription(TimestampMixin, models.Model):
-    user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscription")
+    """
+    Подписка пользователя на систему.
+
+    Атрибуты:
+    - user: Пользователь, который подписан (OneToOneField).
+    - start_date: Дата начала подписки.
+    - end_date: Дата окончания подписки (необязательно).
+    - active: Статус активности подписки.
+    - subscription_type: Тип подписки (выбор из предопределенных типов).
+
+    Методы:
+    - save: Устанавливает дату окончания подписки в зависимости от типа.
+    - is_active: Проверяет, активна ли подписка.
+    - __str__: Возвращает строку с информацией о подписке.
+    """
+
+    user = models.OneToOneField(
+        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscription")
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=False)
-    subscription_type = models.CharField(max_length=100, choices=SUBSCRIPTION_CHOICES, default="Monthly")
+    subscription_type = models.CharField(
+        max_length=100, choices=SUBSCRIPTION_CHOICES, default="Monthly")
+
+    objects = SubscriptionManager()
 
     def save(self, *args, **kwargs):
         if self.start_date:
