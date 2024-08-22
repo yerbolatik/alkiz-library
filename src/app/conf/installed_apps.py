@@ -9,6 +9,7 @@ APPS = [
     "rentals",
     "reviews",
     "subscriptions",
+    "tg_bot",
     "users",
 ]
 
