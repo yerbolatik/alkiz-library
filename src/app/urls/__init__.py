@@ -5,7 +5,6 @@ from django.urls import include, path
 from app import settings
 from app.conf.media import MEDIA_ROOT, MEDIA_URL
 from app.conf.static import STATIC_ROOT, STATIC_URL
-import tg_bot
 
 api = [
     path("v1/", include("app.urls.v1", namespace="v1")),

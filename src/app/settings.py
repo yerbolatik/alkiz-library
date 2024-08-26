@@ -32,3 +32,5 @@ include(
     "conf/templates.py",
     "conf/timezone.py",
 )
+
+APPEND_SLASH = False

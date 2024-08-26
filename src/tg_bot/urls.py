@@ -1,8 +1,9 @@
 from django.urls import path
-from tg_bot.views import telegram, custom_updates, health
+
+from tg_bot import views
 
 urlpatterns = [
-    path("telegram", telegram, name="telegram_updates"),
-    path("custom_updates", custom_updates, name="custom_updates"),
-    path("healthcheck", health, name="healthcheck"),
+    path("telegram", views.telegram, name='telegram_update'),
+    path("submitpayload", views.custom_updates, name="custom_updates"),
+    path("healthcheck", views.health, name="health_check"),
 ]
