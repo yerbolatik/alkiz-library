@@ -1,0 +1,49 @@
+{% extends "tg_bot/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Поиск книг -->
+    <form method="GET" action="{% url 'books:book_search' %}" class="mb-5">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Введите название книги" value="{{ request.GET.q }}">
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+
+    <div class="row mb-5">
+        {% for book in books %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="card h-100">
+                    {% if book.cover_image %}
+                        <a href="{% url 'books:book_detail' book.id %}">
+                            <img src="{{ book.cover_image }}" class="card-img-top" alt="{{ book.title }}">
+                        </a>
+                    {% else %}
+                        <img src="{% static 'images/no_cover_available.jpg' %}" class="card-img-top" alt="Нет обложки">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <a href="{% url 'books:book_detail' book.id %}" class="card-title h5 text-decoration-none d-block mb-2">{{ book.title }}</a>
+                        <p class="card-text"><strong>Авторы:</strong> 
+                            {% for author in book.authors %}
+                                {{ author.first_name }} {{ author.last_name }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p class="card-text"><strong>Язык:</strong> {{ book.language.name }}</p>
+                        <p class="card-text"><strong>Категории:</strong> 
+                            {% for category in book.categories %}
+                                {{ category.name }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">No books found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

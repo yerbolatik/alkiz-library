@@ -1,0 +1,26 @@
+{% extends "tg_bot/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>История арендованных книг</h2>
+
+    {% if rental_history %}
+    <div class="list-group">
+        {% for rental in rental_history %}
+        <div class="list-group-item d-flex align-items-center mb-3">
+            <img src="{{ rental.cover_url }}" alt="Обложка книги" class="img-thumbnail mr-3" style="width: 100px; margin-right: 0.25rem;">
+            <div class="rental-info">
+                <h5>{{ rental.title }}</h5>
+                <p><strong>Автор:</strong> {{ rental.author }}</p>
+                <p><strong>Начало:</strong> {{ rental.start_date }}</p>
+                <p><strong>Конец:</strong> {{ rental.return_date }}</p>
+                <p><strong>Длительность:</strong> {{ rental.rental_duration }} дн.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>В вашей истории нет арендованных книг.</p>
+    {% endif %}
+</div>
+{% endblock content %}

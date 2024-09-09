@@ -28,4 +28,5 @@ class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
     ) -> "CustomContext":
         if isinstance(update, WebhookUpdate):
             return cls(application=application, user_id=update.user_id)
+            # return cls(application=application, user_data={})
         return super().from_update(update, application)

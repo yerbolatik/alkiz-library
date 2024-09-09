@@ -49,6 +49,8 @@ class Favorite(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = FavoriteManager()
+
     class Meta:
         unique_together = ('user', 'book')
 

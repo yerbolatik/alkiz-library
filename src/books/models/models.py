@@ -114,6 +114,7 @@ class Book(TimestampMixin, models.Model):
 
     Методы:
     - __str__: Возвращает заголовок книги в виде строки.
+    - update_average_rating: Обновляет средний рейтинг книги.
     """
 
     title = models.CharField(max_length=255)

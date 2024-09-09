@@ -1,5 +1,6 @@
 from app.conf.auth import AUTH_USER_MODEL
 from app.models import models
+
 from books.models import Book
 from users.mixins import TimestampMixin
 
@@ -18,6 +19,9 @@ class ReviewManager(models.Manager):
 
     def reviews_by_user(self, user):
         return self.filter(user=user)
+
+    def count_unique_reviewers_for_book(self, book):
+        return self.filter(book=book).values('user').distinct().count()
 
 
 class Review(TimestampMixin, models.Model):
@@ -52,13 +56,25 @@ class RatingManager(models.Manager):
     Методы:
     - rating_for_book: Возвращает рейтинги для указанной книги.
     - average_rating_for_book: Возвращает средний рейтинг для указанной книги.
+    - create_or_update_rating: Создает новый рейтинг или обновляет существующий, если пользователь уже голосовал.
     """
 
     def rating_for_book(self, book):
         return self.filter(book=book)
 
     def average_rating_for_book(self, book):
-        return self.filter(book=book).aaggregate(models.Avg('score'))['score__avg']
+        return self.filter(book=book).aggregate(models.Avg('score'))['score__avg']
+
+    def count_unique_users_for_book(self, book):
+        return self.filter(book=book).values('user').distinct().count()
+
+    def create_or_update_rating(self, user, book, score):
+        rating, created = self.update_or_create(
+            user=user,
+            book=book,
+            defaults={'score': score}
+        )
+        return rating, created
 
 
 class Rating(TimestampMixin, models.Model):
@@ -81,6 +97,9 @@ class Rating(TimestampMixin, models.Model):
     score = models.IntegerField()
 
     objects = RatingManager()
+
+    class Meta:
+        unique_together = ('user', 'book')
 
     def __str__(self):
         return f"Rating by {self.user.username} for {self.book.title}"

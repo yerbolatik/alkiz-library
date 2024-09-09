@@ -1,10 +1,14 @@
-from datetime import timedelta
+import asyncio
+
+from datetime import timedelta, datetime
 from django.db.models import Count
 
 from app.conf.auth import AUTH_USER_MODEL
 from app.models import models
 from books.models import Book
 from subscriptions.models import Subscription
+from tg_bot.config import ADMIN_CHAT_ID
+from tg_bot.handlers.rentals import send_telegram_message
 from users.mixins import TimestampMixin
 
 
@@ -30,10 +34,25 @@ class RentalManager(models.Manager):
         if self.filter(book=book, returned=False).exists():
             raise ValueError("Book is already rented out.")
 
-        super().create(**kwargs)
+        rental = super().create(**kwargs)
+
+        # Отправка сообщения в Telegram
+        # Вы должны определить chat_id, куда будет отправляться сообщение
+        chat_id = ADMIN_CHAT_ID
+        asyncio.run(send_telegram_message(
+            chat_id,
+            book.title,
+            rental.start_date,
+            rental.end_date,
+            rental_id=rental.id
+        ))
+
+        return rental
 
     def top_renters(self, limit=10):
-        return self.values('user').annotate(
+        return self.values('user').values(
+            'user__username'
+        ).annotate(
             total_rentals=Count('id')
         ).order_by('-total_rentals')[:limit]
 
@@ -66,6 +85,8 @@ class Rental(TimestampMixin, models.Model):
     objects = RentalManager()
 
     def save(self, *args, **kwargs):
+        if not self.start_date:
+            self.start_date = datetime.now()
         if not self.end_date:
             self.end_date = self.start_date + timedelta(days=14)
         super().save(*args, **kwargs)
@@ -73,6 +94,8 @@ class Rental(TimestampMixin, models.Model):
     def mark_as_returned(self):
         self.returned = True
         self.book.available = True
+        self.end_date = datetime.now()
+        self.book.save()
         self.save()
 
     def __str__(self):

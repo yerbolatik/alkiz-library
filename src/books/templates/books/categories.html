@@ -1,0 +1,129 @@
+{% extends 'tg_bot/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Поиск книг -->
+    <form method="GET" action="{% url 'books:book_search' %}" class="mb-2">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Введите название книги" value="{{ request.GET.q }}">
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+
+    <!-- Кнопки "Жанры" и "Home" -->
+    <div class="mb-4">
+        <ul class="nav nav-underline justify-content-center w-100">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'books:categories' %}">Жанры</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'books:popular_books' %}">Популярные</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'books:new_releases' %}">Новинки</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <!-- Фильтры и категории -->
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Категории -->
+                <div class="dropdown mb-3">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if selected_category %}
+                            {{ selected_category.name }}
+                        {% else %}
+                            Жанры
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="?">Все</a></li>
+                        {% for category in categories %}
+                            <li><a class="dropdown-item" href="?category={{ category.id }}{% if request.GET.filter %}&{{ request.GET.urlencode }}{% endif %}">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+        
+                <!-- Фильтр -->
+                <button class="btn btn-secondary mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#filterForm" aria-expanded="false" aria-controls="filterForm">
+                    Фильтр
+                </button>
+            </div>
+        
+            <!-- Форма фильтра -->
+            <div class="collapse" id="filterForm">
+                <div class="card card-body border-secondary shadow-sm">
+                    <form method="get" action="">
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Применить фильтры</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="col-md-8">
+                {% if book_details %}
+                    <div class="list-group">
+                        {% for detail in book_details %}
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-row">
+                                    <a href="{% url 'books:book_detail' detail.book.id %}" class="text-decoration-none">
+                                        {% if detail.book.cover_image %}
+                                            <img src="{{ detail.book.cover_image.url }}" alt="{{ detail.book.title }}" class="img-thumbnail me-3" style="width: 100px; height: auto;">
+                                        {% else %}
+                                            <img src="{% static 'images/no_cover_available.jpg' %}" alt="Нет обложки" class="img-thumbnail me-3" style="width: 100px; height: auto;">
+                                        {% endif %}
+                                    </a>
+                                    <div class="d-flex flex-column">
+                                        <a href="{% url 'books:book_detail' detail.book.id %}" class="card-title text-decoration-none d-block">{{ detail.book.title }}</a>
+                                        <small class="text-muted">Авторы: {{ detail.authors|join:", " }}</small>
+                                        <small class="text-muted">Язык: {{ detail.language.name }}</small>
+                                        <p class="card-text mb-0">
+                                            <i class="fas fa-star"></i>
+                                            {% if detail.average_rating %}
+                                                {{ detail.average_rating|floatformat:1 }}
+                                            {% else %}
+                                                0,0
+                                            {% endif %}
+                                        </p>
+                                        <p class="card-text mb-0">
+                                            {% if detail.book.available %}
+                                                <i class="fas fa-check"></i> В наличии
+                                            {% else %}
+                                                <i class="fas fa-times"></i> Нет в наличии
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <form method="post" action="{% url 'favorites:favorites' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="book_id" value="{{ detail.book.id }}">
+                                    {% if detail.is_favorite %}
+                                        <button type="submit" name="remove_from_favorites" class="btn btn-transparent">
+                                            <i class="fas fa-heart text-danger"></i>
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" name="add_to_favorites" class="btn btn-transparent">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        {% empty %}
+                            <p class="text-center">Книг не найдено.</p>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Книг в этой категории нет.</p>
+                {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
