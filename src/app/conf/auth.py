@@ -3,7 +3,7 @@ from datetime import timedelta
 from app.conf.environ import env
 
 AUTH_USER_MODEL = "users.User"
-AXES_ENABLED = env("AXES_ENABLED", cast=bool, default=True)
+AXES_ENABLED = env("AXES_ENABLED", cast=bool, default=False)
 
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",

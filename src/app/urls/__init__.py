@@ -13,6 +13,11 @@ api = [
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(api)),
+    path("bot/", include("tg_bot.urls")),
+    path("favorites/", include("favorites.urls")),
+    path("books/", include("books.urls")),
+    path("users/", include("users.urls")),
+    path("rentals/", include("rentals.urls")),
 ]
 
 if settings.DEBUG:

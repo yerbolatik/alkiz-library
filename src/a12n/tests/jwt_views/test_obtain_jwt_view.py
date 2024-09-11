@@ -40,7 +40,8 @@ def test_getting_token_ok(as_user, get_token):
 def test_getting_token_is_token(as_user, get_token):
     result = get_token(as_user.user.username, as_user.password)
 
-    assert len(result["token"]) > 32  # every stuff that is long enough, may be a JWT token
+    # every stuff that is long enough, may be a JWT token
+    assert len(result["token"]) > 32
 
 
 def test_getting_token_with_incorrect_password(as_user, get_token):

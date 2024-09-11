@@ -4,10 +4,12 @@ APPS = [
     "a12n",
     "app",
     "books",
+    "favorites",
     "notifications",
     "rentals",
     "reviews",
     "subscriptions",
+    "tg_bot",
     "users",
 ]
 

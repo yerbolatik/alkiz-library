@@ -1,0 +1,60 @@
+{% extends "tg_bot/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Мои избранные книги</h1>
+    {% if favorite_books %}
+    <div class="list-group">
+        {% for favorite in favorite_books %}
+        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-row">
+                <!-- Display book image -->
+                <img src="{{ favorite.book.cover_image.url }}" alt="{{ favorite.book.title }}" class="img-thumbnail me-3" style="width: 100px; height: auto;">
+
+                <div class="d-flex flex-column">
+                    <h5 class="mb-1">{{ favorite.book.title }}</h5>
+                    <small class="text-muted">Авторы: 
+                        {% for author in favorite.authors %}
+                            {{ author.first_name }} {{ author.last_name }}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </small>
+                    
+                    <p class="card-text mb-0">
+                        {% if favorite.book.available %}
+                            <i class="fas fa-check"></i> В наличии
+                        {% else %}
+                            <i class="fas fa-times"></i> Нет в наличии
+                        {% endif %}
+                    </p>
+                    
+                    {% if favorite.book.available %}
+                    <div class="me-3">
+                        <button type="button" class="btn btn-success">Арендовать книгу</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Favorite button -->
+            <form method="post" action="{% url 'favorites:favorites' %}" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="book_id" value="{{ favorite.book.id }}">
+                {% if is_favorite %}
+                    <button type="submit" name="remove_from_favorites" class="btn btn-transparent">
+                        <i class="fas fa-heart text-danger"></i>
+                    </button>
+                {% else %}
+                    <button type="submit" name="add_to_favorites" class="btn btn-transparent">
+                        <i class="far fa-heart"></i>
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>У вас нет избранных книг.</p>
+    {% endif %}
+</div>
+{% endblock %}
